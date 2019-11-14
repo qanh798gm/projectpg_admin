@@ -81,11 +81,11 @@ class ManageProducts extends React.Component {
         dataIndex: "Name",
         key: "Name"
       },
-      {
-        title: "Image",
-        dataIndex: "Image",
-        key: "Image"
-      },
+      // {
+      //   title: "Image",
+      //   dataIndex: "Image",
+      //   key: "Image"
+      // },
       {
         title: "Description",
         dataIndex: "Description",
@@ -95,11 +95,6 @@ class ManageProducts extends React.Component {
         title: "Price",
         dataIndex: "Price",
         key: "Price"
-      },
-      {
-        title: "Sold",
-        dataIndex: "Sold",
-        key: "Sold"
       },
       {
         title: "Quantity",
@@ -144,14 +139,13 @@ class ManageProducts extends React.Component {
         return {
           key: item._id,
           Name: item.name,
-          Image: item.images.length
-            ? this.showImage(item.images[0].url)
-            : "No Image",
+          // Image: item.images.length
+          //   ? this.showImage(item.images[0].url)
+          //   : "No Image",
           Description: `${item.description.slice(0, 50)}...`,
-          Category: item.wood.name,
-          Brand: item.brand.name,
+          Category: item.categoryID,
+          Brand: item.brand,
           Price: item.price,
-          Sold: item.sold,
           Quantity: item.quantity
         };
       })

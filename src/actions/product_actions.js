@@ -10,7 +10,7 @@ export const getProducts = () => {
 };
 export const updateProduct = (id, data) => {
   const request = axios
-    .post(`/api/item/update/${id}`, data)
+    .patch(`/products/${id}`, data)
     .then(res => res.data);
   return {
     type: Types.UPDATE_PRODUCT,
@@ -19,7 +19,7 @@ export const updateProduct = (id, data) => {
 };
 export const addProduct = datatoSubmit => {
   const request = axios
-    .post(`/api/item/article`, datatoSubmit)
+    .post(`/products`, datatoSubmit)
     .then(response => response.data);
 
   return {

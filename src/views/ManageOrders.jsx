@@ -1,11 +1,13 @@
 import React from "react";
 import { Button, Badge, message } from "antd";
 import { getOrders, updatePayment } from "../actions/report_actions";
+import { getCustomers } from "../actions/customer_actions";
 import { connect } from "react-redux";
 import moment from "moment";
 import MUIDataTable from "mui-datatables";
 import NumberFormat from "react-number-format";
 import { Link } from "react-router-dom";
+import * as _ from 'lodash';
 class ManageOrders extends React.Component {
   state = {
     loading: false,
@@ -17,6 +19,7 @@ class ManageOrders extends React.Component {
 
   componentDidMount() {
     this.props.dispatch(getOrders());
+    this.props.dispatch(getCustomers());
     // this.props.dispatch(auth()).then(res => {
     //   console.log(res.payload);
     //   if (!res.payload.isAdmin) {
@@ -39,17 +42,19 @@ class ManageOrders extends React.Component {
   showdata = () => {
     let newData = [];
     if (this.props.report.allOrders) {
-      console.log(this.props.report.allOrders);
       newData = this.props.report.allOrders.map((item, i) => {
+
         return [
-          item.products
-            ? item.products.map(item => {
-                return item.name;
-              })
-            : "",
-          `${moment(new Date(item.date)).format("LL")}`,
+          // item.owner
+          //   ? item.products.map(item => {
+          //     return item.name;
+          //   })
+          //   : "",
+          item.owner
+          ,
+          `${moment(new Date(item.createdAt)).format("LL")}`,
           <NumberFormat
-            value={item.amount}
+            value={item.totalPrice}
             displayType={"text"}
             thousandSeparator={true}
             prefix={"$"}
@@ -60,10 +65,10 @@ class ManageOrders extends React.Component {
               <Badge status="processing" /> Pending
             </>
           ) : (
-            <>
-              <Badge status="success" /> Active
+              <>
+                <Badge status="success" /> Active
             </>
-          ),
+            ),
           <>
             {item.status === "Pending" ? (
               <Button
@@ -75,8 +80,8 @@ class ManageOrders extends React.Component {
                 Active
               </Button>
             ) : (
-              " "
-            )}
+                " "
+              )}
             &nbsp;
             <Link to={`orderdetail/${item._id}`}>
               <Button style={{ background: "#ba54f5" }}>Detail</Button>
@@ -110,7 +115,8 @@ class ManageOrders extends React.Component {
 }
 const mapStateToProps = state => {
   return {
-    report: state.report
+    report: state.report,
+    customer: state.customer
   };
 };
 
