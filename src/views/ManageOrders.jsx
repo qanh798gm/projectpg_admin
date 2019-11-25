@@ -8,6 +8,7 @@ import MUIDataTable from "mui-datatables";
 import NumberFormat from "react-number-format";
 import { Link } from "react-router-dom";
 import * as _ from 'lodash';
+import { isArray } from "util";
 class ManageOrders extends React.Component {
   state = {
     loading: false,
@@ -43,14 +44,8 @@ class ManageOrders extends React.Component {
     let newData = [];
     if (this.props.report.allOrders) {
       newData = this.props.report.allOrders.map((item, i) => {
-
         return [
-          // item.owner
-          //   ? item.products.map(item => {
-          //     return item.name;
-          //   })
-          //   : "",
-          item.owner
+          item.ownerEmail
           ,
           `${moment(new Date(item.createdAt)).format("LL")}`,
           <NumberFormat
@@ -60,15 +55,7 @@ class ManageOrders extends React.Component {
             prefix={"$"}
           />,
 
-          item.status === "Pending" ? (
-            <>
-              <Badge status="processing" /> Pending
-            </>
-          ) : (
-              <>
-                <Badge status="success" /> Active
-            </>
-            ),
+          item.status,
           <>
             {item.status === "Pending" ? (
               <Button
@@ -93,7 +80,7 @@ class ManageOrders extends React.Component {
     return newData;
   };
   render() {
-    const columns = ["Customer Name", "Date", "Amount", "Status", "Actions"];
+    const columns = ["Customer Email", "Date", "Amount", "Status", "Actions"];
     const options = {
       filterType: "dropdown",
       responsive: "scroll",

@@ -18,7 +18,8 @@ export const reportDate = data => {
   };
 };
 export const getOrders = () => {
-  const request = axios.get("/ordersWithoutAuth").then(res => res.data);
+  const sendToken = JSON.parse(localStorage.getItem("userData")).token;
+  const request = axios.get("/orders", { headers: { "Authorization": `Bearer ${sendToken}` } }).then(res => res.data);
   return {
     type: Types.GET_ORDERS,
     payload: request

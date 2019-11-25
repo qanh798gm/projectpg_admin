@@ -2,7 +2,8 @@ import * as Types from "../constants/types";
 import axios from '../axios';
 
 export const getCustomers = () => {
-  const request = axios.get("/usersAll").then(res => res.data);
+  const sendToken = JSON.parse(localStorage.getItem("userData")).token;
+  const request = axios.get("/users", { headers: { "Authorization": `Bearer ${sendToken}` } }).then(res => res.data);
   return {
     type: Types.GETALL_CUSTOMER,
     payload: request

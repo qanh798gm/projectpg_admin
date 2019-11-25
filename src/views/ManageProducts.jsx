@@ -143,7 +143,7 @@ class ManageProducts extends React.Component {
           //   ? this.showImage(item.images[0].url)
           //   : "No Image",
           Description: `${item.description.slice(0, 50)}...`,
-          Category: item.categoryID,
+          Category: item.categoryName,
           Brand: item.brand,
           Price: item.price,
           Quantity: item.quantity
