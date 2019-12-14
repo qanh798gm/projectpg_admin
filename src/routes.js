@@ -58,14 +58,6 @@ var routes = [
     layout: "/admin"
   },
   {
-    path: "/brands",
-    name: "Manage Brands",
-    rtlName: "قائمة الجدول",
-    icon: "tim-icons icon-puzzle-10",
-    component: Brand,
-    layout: "/admin"
-  },
-  {
     path: "/types",
     name: "Manage Types",
     rtlName: "قائمة الجدول",

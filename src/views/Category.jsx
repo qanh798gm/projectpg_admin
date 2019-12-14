@@ -214,11 +214,24 @@ class Categories extends React.Component {
             <Form.Item>
               {getFieldDecorator("name", {
                 rules: [
-                  { required: true, message: "Please input your username!" }
+                  { required: true, message: "Please input category name!" }
                 ]
               })(<Input placeholder="Name" />)}
             </Form.Item>
-            <Form.Item />
+            <Form.Item>
+              {getFieldDecorator("type", {
+                rules: [
+                  { required: true, message: "Please input type!" }
+                ]
+              })(<Input placeholder="Type" />)}
+            </Form.Item>
+            <Form.Item>
+              {getFieldDecorator("description", {
+                rules: [
+                  { required: true, message: "Please input description!" }
+                ]
+              })(<Input placeholder="Description" />)}
+            </Form.Item>
           </Form>
         </Modal>
       </>

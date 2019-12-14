@@ -24,17 +24,17 @@ class Fileupload extends Component {
     };
     formData.append("file", files[0]);
 
-    axios.post("/api/client/uploadimage", formData, config).then(response => {
-      this.setState(
-        {
-          uploading: false,
-          uploadedFiles: [...this.state.uploadedFiles, response.data]
-        },
-        () => {
-          this.props.imagesHandler(this.state.uploadedFiles);
-        }
-      );
-    });
+    // axios.post("/api/client/uploadimage", formData, config).then(response => {
+    //   this.setState(
+    //     {
+    //       uploading: false,
+    //       uploadedFiles: [...this.state.uploadedFiles, response.data]
+    //     },
+    //     () => {
+    //       this.props.imagesHandler(this.state.uploadedFiles);
+    //     }
+    //   );
+    // });
   };
 
   onRemove = id => {

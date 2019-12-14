@@ -54,8 +54,9 @@ class ManageOrders extends React.Component {
             thousandSeparator={true}
             prefix={"$"}
           />,
-
+          item.detail[3],
           item.status,
+
           <>
             {item.status === "Pending" ? (
               <Button
@@ -80,7 +81,7 @@ class ManageOrders extends React.Component {
     return newData;
   };
   render() {
-    const columns = ["Customer Email", "Date", "Amount", "Status", "Actions"];
+    const columns = ["Customer Email", "Date", "Amount", "Payment", "Status", "Actions"];
     const options = {
       filterType: "dropdown",
       responsive: "scroll",

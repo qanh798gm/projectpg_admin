@@ -79,6 +79,7 @@ class OrderDetail extends React.Component {
                   <thead>
                     <tr>
                       <th>Product</th>
+                      <th></th>
                       <th>Quantity</th>
                       <th className="text-center">Price</th>
                       <th className="text-center">Total</th>
@@ -90,6 +91,12 @@ class OrderDetail extends React.Component {
                         <tr key={i}>
                           <td className="col-md-9">
                             <em>{item.name}</em>
+                          </td>
+                          <td>
+                            <img
+                              alt="..."
+                              src={`http://localhost:3001/products/${item._id}/image`}
+                            />
                           </td>
                           <td
                             className="col-md-1"

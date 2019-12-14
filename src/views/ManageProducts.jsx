@@ -7,12 +7,14 @@ import {
   message,
   Popconfirm,
   Spin,
-  Icon
+  Icon, Modal, InputNumber
 } from "antd";
 import { getProducts, deleteProduct } from "../actions/product_actions";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 import NotificationAlert from "react-notification-alert";
+import axios from '../axios'
+
 class ManageProducts extends React.Component {
   state = {
     loading: false,
@@ -20,7 +22,11 @@ class ManageProducts extends React.Component {
     edit: false,
     categories: [],
     id: "",
-    allProducts: []
+    allProducts: [],
+    quantity: 0,
+    stock: 0,
+    idToUpdate: '',
+    stockModal: false
   };
 
   componentDidMount() {
@@ -73,6 +79,87 @@ class ManageProducts extends React.Component {
       <img src={image} width={50} style={{ borderRadius: "10px" }} alt="" />
     );
   };
+
+  stockHandler = (_id, quantity) => {
+    const product = {
+      _id: _id,
+      quantity: parseInt(quantity),
+    }
+    const sendToken = JSON.parse(localStorage.getItem("userData")).token;
+    axios.post(`/users/addToCart`, product,
+      { headers: { "Authorization": `Bearer ${sendToken}` } })
+      .then(response => {
+        console.log(response)
+      })
+  }
+
+  onEdit = id => {
+    this.setState({ visible: true, edit: true, id });
+    const { form, product } = this.props;
+    if (product.products) {
+      product.products.forEach(item => {
+        if (item._id === id) {
+          form.setFields({ name: { value: item.name } });
+        }
+      });
+    }
+  };
+
+  handleOk = e => {
+    console.log(this.state.stock)
+    const sendToken = JSON.parse(localStorage.getItem("userData")).token;
+    console.log(sendToken)
+    console.log(this.state.idToUpdate)
+    axios.patch(`/products/${this.state.idToUpdate}`, {
+      quantity: this.state.stock
+    }, {
+      headers: {
+        "Authorization": `Bearer ${sendToken}`
+      }
+    }).then(res => {
+      console.log(res)
+
+      this.props.dispatch(getProducts()).then(res => {
+        this.setState({ allProducts: res.payload });
+        res.payload.forEach(item => {
+          if (item.quantity == 0) {
+            var options = {};
+            options = {
+              place: "tr",
+              message: (
+                <div>
+                  <div>
+                    <b>Product {item.name} is out of stock!</b>
+                  </div>
+                </div>
+              ),
+              type: "danger",
+              icon: "tim-icons icon-bell-55",
+              autoDismiss: 7
+            };
+            this.refs.notificationAlert.notificationAlert(options);
+          }
+        });
+      });
+
+      this.setState({
+        stockModal: false,
+      });
+    }).catch(e => {
+      console.log(e)
+    })
+
+
+
+  };
+
+  handleCancel = e => {
+
+    this.setState({
+      stockModal: false,
+    });
+  };
+
   render() {
     const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
     const columns = [
@@ -121,6 +208,12 @@ class ManageProducts extends React.Component {
               <Button>Edit</Button>
             </Link>
             <Divider type="vertical" />
+            <Button type="info"
+              onClick={() => this.setState({ stockModal: true, stock: record.Quantity, idToUpdate: record.key })}
+            >
+              Stock
+            </Button>
+            <Divider type="vertical" />
             <Popconfirm
               title={`Are you sure delete this product ${record.Name}`}
               onConfirm={() => this.onconfirm(record.key)}
@@ -146,10 +239,13 @@ class ManageProducts extends React.Component {
           Category: item.categoryName,
           Brand: item.brand,
           Price: item.price,
-          Quantity: item.quantity
+          Quantity: item.quantity,
         };
       })
       : null;
+
+    const { getFieldDecorator } = this.props.form;
+
     return (
       <>
         <div className="content">
@@ -180,6 +276,18 @@ class ManageProducts extends React.Component {
               <Spin indicator={antIcon} />
             )}
         </div>
+
+        <Modal
+          title="Stock"
+          visible={this.state.stockModal}
+          onOk={this.handleOk}
+          onCancel={this.handleCancel}
+        >
+          <div className="quantity">
+            <input type="number" min="0" value={this.state.stock} onChange={(event) => this.setState({ stock: event.target.value })} />
+          </div>
+        </Modal>
+
       </>
     );
   }

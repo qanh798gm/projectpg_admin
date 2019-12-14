@@ -35,7 +35,7 @@ export const clearProduct = () => {
   };
 };
 export const deleteProduct = id => dispatch => {
-  axios.get(`/api/item/delete/${id}`).then(res =>
+  axios.get(`/products/${id}`).then(res =>
     dispatch({
       type: Types.DELETE_PRODUCT,
       payload: id

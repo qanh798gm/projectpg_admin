@@ -3,12 +3,15 @@ import { connect } from "react-redux";
 import { getTypes, getBrands } from "../actions/category_actions";
 import { withRouter } from "react-router-dom";
 import { addProduct, updateProduct } from "../actions/product_actions";
-import { Button, Form, Input, Select } from "antd";
+import { Button, Form, Input, Select, Upload, Icon } from "antd";
 import NotificationAlert from "react-notification-alert";
 import FileUpload from "../utils/fileupload";
 // import CKEditor from "react-ckeditor-component";
+import axios from '../axios'
 const Option = Select.Option;
 const { TextArea } = Input;
+
+
 class Products extends React.Component {
   state = {
     brands: [],
@@ -16,6 +19,7 @@ class Products extends React.Component {
     images: [],
     brand: "",
     type: "",
+    categoryID: "",
     loading: false,
     resetImages: false,
     edit: false
@@ -29,7 +33,7 @@ class Products extends React.Component {
       if (product.allProducts) {
         product.allProducts.forEach(item => {
           if (item._id === match.params.id) {
-            this.setState({ images: item.images });
+            this.setState({ images: item.image });
           }
         });
       }
@@ -49,13 +53,9 @@ class Products extends React.Component {
               description: { value: item.description },
               name: { value: item.name },
               price: { value: item.price },
-              brand: { value: item.brand._id },
+              brand: { value: item.brand },
               quantity: { value: item.quantity > 0 ? item.quantity : 0 },
-              types: { value: item.wood._id },
-              available: { value: item.available ? 1 : 0 },
-              EngineCapacity: { value: item.frets },
-              Publish: { value: item.publish ? 1 : 0 },
-              shipping: { value: item.shipping ? 1 : 0 }
+              categoryID: { value: item.categoryID }
             });
           }
         });
@@ -80,21 +80,28 @@ class Products extends React.Component {
     const { form, match } = this.props;
     this.setState({ loading: true });
     form.validateFields((err, values) => {
+      let categoryName = '';
+      const sendToken = JSON.parse(localStorage.getItem("userData")).token;
+      axios.get(`/categories/${values.categoryID}`, sendToken, {
+        headers: {
+          "Authorization": `Bearer ${sendToken}`
+        }
+      }).then(res => {
+        categoryName = res.data
+      })
       if (!err) {
         let dataSubmit = {
-          images: images,
+          image: images,
           name: values.name,
-          frets: values.EngineCapacity,
           description: values.description,
           price: values.price,
           brand: values.brand,
+          categoryID: values.categoryID,
+          categoryName: categoryName,
           quantity: values.quantity,
-          wood: values.types,
-          publish: values.Publish === 1 ? true : false,
-          shipping: values.shipping === 1 ? true : false,
-          available: values.available === 1 ? true : false
         };
         if (edit) {
+          console.log('edit')
           this.props
             .dispatch(updateProduct(match.params.id, dataSubmit))
             .then(res => {
@@ -108,6 +115,8 @@ class Products extends React.Component {
               }
             });
         } else {
+          console.log(this.state.images)
+          console.log('add')
           this.props.dispatch(addProduct(dataSubmit)).then(res => {
             if (res.payload.success) {
               this.setState({ loading: false, resetImages: true, images: [] });
@@ -182,16 +191,27 @@ class Products extends React.Component {
             className="login-form"
             style={{ width: "70%", margin: "0 auto" }}
           >
-            <Form.Item {...formItemLayout} label="Image">
+            {/* <Form.Item {...formItemLayout} label="Image">
               <FileUpload
                 imagesHandler={images => this.imagesHandler(images)}
                 reset={resetImages}
                 images={this.state.images}
               />
-            </Form.Item>
+              {getFieldDecorator("image", {
+                rules: [{ required: true, message: "Please upload image!" }], valuePropName: 'fileList',
+                getValueFromEvent: this.normFile,
+              })(
+                <Upload name="logo" listType="picture">
+                  <Button>
+                    <Icon type="upload" /> Click to upload
+                </Button>
+                </Upload>,
+              )}
+
+            </Form.Item> */}
 
             <Form.Item {...formItemLayout} label="Name">
-              {getFieldDecorator("name", {rules: [{ required: true, message: "Please input your name!" }]}) (
+              {getFieldDecorator("name", { rules: [{ required: true, message: "Please input your name!" }] })(
                 <Input placeholder="Name" />
               )}
             </Form.Item>
@@ -219,31 +239,12 @@ class Products extends React.Component {
               })(<Input placeholder="Quantity" type="number" />)}
             </Form.Item>
             <Form.Item {...formItemLayout} label="Brand">
-              {getFieldDecorator("brand", {
-                rules: [{ required: true, message: "Please select a brand!" }]
-              })(
-                <Select
-                  showSearch
-                  placeholder="Select a brand"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.props.children
-                      .toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
-                  }
-                >
-                  {brands
-                    ? brands.map((brand, i) => (
-                        <Option value={brand._id} key={i}>
-                          {brand.name}
-                        </Option>
-                      ))
-                    : null}
-                </Select>
+              {getFieldDecorator("brand", { rules: [{ required: true, message: "Please input your brand!" }] })(
+                <Input placeholder="Brand" />
               )}
             </Form.Item>
             <Form.Item {...formItemLayout} label="Category">
-              {getFieldDecorator("types", {
+              {getFieldDecorator("categoryID", {
                 rules: [
                   { required: true, message: "Please select a category!" }
                 ]
@@ -260,109 +261,11 @@ class Products extends React.Component {
                 >
                   {types
                     ? types.map((type, i) => (
-                        <Option value={type._id} key={i}>
-                          {type.name}
-                        </Option>
-                      ))
+                      <Option value={type._id} key={i}>
+                        {type.name}
+                      </Option>
+                    ))
                     : null}
-                </Select>
-              )}
-            </Form.Item>
-            <Form.Item {...formItemLayout} label="Available">
-              {getFieldDecorator("available", {
-                rules: [
-                  {
-                    required: true,
-                    message: "Please select status for available!"
-                  }
-                ]
-              })(
-                <Select
-                  showSearch
-                  placeholder="Select a status"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.props.children
-                      .toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
-                  }
-                >
-                  <Option value={1}>Yes</Option>
-                  <Option value={0}>No</Option>
-                </Select>
-              )}
-            </Form.Item>
-            <Form.Item {...formItemLayout} label="Shipping">
-              {getFieldDecorator("shipping", {
-                rules: [
-                  {
-                    required: true,
-                    message: "Please select status for shipping!"
-                  }
-                ]
-              })(
-                <Select
-                  showSearch
-                  placeholder="Select a status"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.props.children
-                      .toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
-                  }
-                >
-                  <Option value={1}>Yes</Option>
-                  <Option value={0}>No</Option>
-                </Select>
-              )}
-            </Form.Item>
-            <Form.Item {...formItemLayout} label="Engine Capacity">
-              {getFieldDecorator("EngineCapacity", {
-                rules: [
-                  {
-                    required: true,
-                    message: "Please select a capacity!"
-                  }
-                ]
-              })(
-                <Select
-                  showSearch
-                  placeholder="Select a capacity"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.props.children
-                      .toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
-                  }
-                >
-                  <Option value={250}>250cc to 750cc</Option>
-                  <Option value={750}>750cc to 1000cc</Option>
-                  <Option value={1000}>1000cc to 1500cc</Option>
-                  <Option value={1500}>Other</Option>
-                </Select>
-              )}
-            </Form.Item>
-            <Form.Item {...formItemLayout} label="Publish">
-              {getFieldDecorator("Publish", {
-                rules: [
-                  {
-                    required: true,
-                    message: "Please select a status!"
-                  }
-                ]
-              })(
-                <Select
-                  showSearch
-                  placeholder="Select a status"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    option.props.children
-                      .toLowerCase()
-                      .indexOf(input.toLowerCase()) >= 0
-                  }
-                >
-                  <Option value={1}>Publish</Option>
-                  <Option value={0}>Hidden</Option>
                 </Select>
               )}
             </Form.Item>
